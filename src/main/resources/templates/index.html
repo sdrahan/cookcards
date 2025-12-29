@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>CookCards</title>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen">
+
+<div class="text-center space-y-2">
+    <h1 class="text-4xl font-semibold font-montserrat mb-8 text-slate-800">CookCards</h1>
+    <p class="text-sm font-lato mt-4 text-slate-800">
+        Already have an account? <a class="text-blue-600 underline" th:href="@{/login}">Log in</a>
+    </p>
+    <form th:action="@{/logout}" method="post">
+        <input type="submit" value="Sign Out"/>
+    </form>
+
+</div>
+
+</body>
+</html>

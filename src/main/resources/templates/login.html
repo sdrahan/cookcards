@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Sign in | CookCards</title>
+</head>
+<body class="flex flex-col items-center justify-center min-h-screen">
+
+<div class="text-center space-y-6 w-full max-w-md">
+    <h1 class="text-3xl font-semibold font-montserrat mb-6">Login</h1>
+
+    <!-- Login Form -->
+    <form th:action="@{/login}" method="POST" class="space-y-4" id="loginForm">
+
+        <!-- Email -->
+        <div>
+            <label for="username" class="block text-left font-lato text-sm mb-1">Email</label>
+            <input type="email" id="username" name="username"  required
+                   class="w-full p-2 border border-gray-300 rounded text-sm font-lato">
+        </div>
+
+        <!-- Password -->
+        <div>
+            <label for="password" class="block text-left font-lato text-sm mb-1">Password</label>
+            <input type="password" id="password" name="password"  required
+                   class="w-full p-2 border border-gray-300 rounded text-sm font-lato">
+        </div>
+
+        <!-- Error Message (optional for future use) -->
+        <div id="loginError" class="text-red-600 text-sm" style="display:none;">
+            Invalid login credentials. Please try again.
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+                class="w-full p-3 text-white text-sm font-lato rounded"
+                style="background-color: #27AB83;">
+            Log In
+        </button>
+    </form>
+
+    <!-- Link to Signup -->
+    <p class="text-sm font-lato">
+        Don't have an account? <a th:href="@{/signup}" class="text-blue-600 underline">Sign up here</a>.
+    </p>
+</div>
+
+<!-- JavaScript for Validation -->
+<script>
+    document.getElementById("loginForm").addEventListener("submit", function(event) {
+        var email = document.getElementById("email").value;
+        var password = document.getElementById("password").value;
+        var loginError = document.getElementById("loginError");
+
+        // Basic client-side validation: check if both fields are filled
+        if (email === "" || password === "") {
+            // Prevent form submission
+            event.preventDefault();
+
+            // Display error message
+            loginError.style.display = "block";
+            loginError.innerText = "Please fill in both email and password.";
+        } else {
+            // Hide error message if fields are filled
+            loginError.style.display = "none";
+        }
+    });
+
+    // Check for error query parameter in the URL
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        var loginError = document.getElementById("loginError");
+
+        // If the error parameter is present (regardless of its value), display the error message
+        if (urlParams.has('error')) {
+            loginError.style.display = "block";
+            loginError.innerText = "Email address or password is incorrect.";
+        }
+    };
+</script>
+
+</body>
+</html>
