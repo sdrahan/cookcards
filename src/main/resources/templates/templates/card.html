@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="view(recipe)"
+     class="max-w-md mx-auto border border-slate-200 rounded-2xl p-5 space-y-4">
+
+    <h1 class="text-xl font-semibold font-montserrat text-slate-900"
+        th:text="${recipe.title}">Recipe title</h1>
+
+    <div>
+        <h2 class="text-sm font-semibold font-montserrat text-slate-800 mb-2">Ingredients</h2>
+        <ul class="list-disc pl-5 space-y-1 font-lato text-sm text-slate-800">
+            <li th:each="ing : ${recipe.ingredients}" th:text="${ing.item}">Ingredient</li>
+        </ul>
+    </div>
+
+    <div>
+        <h2 class="text-sm font-semibold font-montserrat text-slate-800 mb-2">Steps</h2>
+        <ol class="list-decimal pl-5 space-y-2 font-lato text-sm text-slate-800">
+            <li th:each="st : ${recipe.steps}" th:text="${st.text}">Step</li>
+        </ol>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="view(recipe)"
+     class="space-y-6">
+
+    <div>
+        <h1 class="text-2xl font-semibold font-montserrat text-slate-900"
+            th:text="${recipe.title}">Recipe title</h1>
+
+        <div class="mt-2 space-y-1 text-xs font-lato text-slate-500">
+            <div th:if="${recipe.servingsAndYield != null and !recipe.servingsAndYield.isEmpty()}"
+                 th:text="${#strings.listJoin(recipe.servingsAndYield, ' • ')}"></div>
+
+            <div th:if="${recipe.times != null and !recipe.times.isEmpty()}"
+                 th:text="${#strings.listJoin(recipe.times, ' • ')}"></div>
+        </div>
+    </div>
+
+    <!-- Ingredients -->
+    <section class="space-y-2">
+        <h2 class="text-xs uppercase tracking-wide font-montserrat text-slate-500">Ingredients</h2>
+        <div class="font-lato text-sm text-slate-800">
+            <div th:each="ing : ${recipe.ingredients}"
+                 th:text="${ing.item}"
+                 class="leading-6"></div>
+        </div>
+    </section>
+
+    <!-- Steps -->
+    <section class="space-y-2">
+        <h2 class="text-xs uppercase tracking-wide font-montserrat text-slate-500">Steps</h2>
+        <ol class="list-decimal pl-5 space-y-2 font-lato text-sm text-slate-800">
+            <li th:each="st : ${recipe.steps}"
+                th:text="${st.text}">Step</li>
+        </ol>
+    </section>
+
+    <!-- Notes -->
+    <section th:if="${recipe.notes != null and !recipe.notes.isEmpty()}"
+             class="space-y-2">
+        <h2 class="text-xs uppercase tracking-wide font-montserrat text-slate-500">Notes</h2>
+        <div class="font-lato text-sm text-slate-700">
+            <div th:each="n : ${recipe.notes}"
+                 th:text="${n}"
+                 class="leading-6"></div>
+        </div>
+    </section>
+
+</div>
+
+</body>
+</html>
