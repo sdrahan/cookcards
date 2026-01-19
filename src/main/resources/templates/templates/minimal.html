@@ -1,54 +1,57 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<body>
-
-<div th:fragment="view(recipe)"
-     class="space-y-6">
-
+<div th:fragment="preview (recipe)" class="space-y-6 text-slate-800">
     <div>
-        <h1 class="text-2xl font-semibold font-montserrat text-slate-900"
-            th:text="${recipe.title}">Recipe title</h1>
-
-        <div class="mt-2 space-y-1 text-xs font-lato text-slate-500">
-            <div th:if="${recipe.servingsAndYield != null and !recipe.servingsAndYield.isEmpty()}"
-                 th:text="${#strings.listJoin(recipe.servingsAndYield, ' • ')}"></div>
-
-            <div th:if="${recipe.times != null and !recipe.times.isEmpty()}"
-                 th:text="${#strings.listJoin(recipe.times, ' • ')}"></div>
+        <h2 class="text-3xl font-semibold tracking-tight" th:text="${recipe.title()}"></h2>
+        <p th:if="${recipe.language() != null}" class="text-xs uppercase tracking-wide text-slate-500 mt-1"
+           th:text="'Language: ' + ${recipe.language()}"></p>
+        <div class="mt-4 text-sm space-y-1">
+            <p th:if="${recipe.servingsAndYield() != null and !#lists.isEmpty(recipe.servingsAndYield())}">
+                <span class="font-semibold">Yield:</span>
+                <span th:each="line : ${recipe.servingsAndYield()}"
+                      class="inline-block mr-2"
+                      th:text="${line}"></span>
+            </p>
+            <p th:if="${recipe.times() != null and !#lists.isEmpty(recipe.times())}">
+                <span class="font-semibold">Times:</span>
+                <span th:each="time : ${recipe.times()}"
+                      class="inline-block mr-2"
+                      th:text="${time}"></span>
+            </p>
         </div>
     </div>
 
-    <!-- Ingredients -->
-    <section class="space-y-2">
-        <h2 class="text-xs uppercase tracking-wide font-montserrat text-slate-500">Ingredients</h2>
-        <div class="font-lato text-sm text-slate-800">
-            <div th:each="ing : ${recipe.ingredients}"
-                 th:text="${ing.item}"
-                 class="leading-6"></div>
-        </div>
+    <section>
+        <h3 class="text-lg font-semibold mb-3 tracking-wide uppercase text-slate-600">Ingredients</h3>
+        <ul class="space-y-2">
+            <li th:each="ingredient : ${recipe.ingredients()}" class="text-base leading-relaxed">
+                <span th:if="${ingredient.section() != null}" class="block text-xs uppercase text-slate-400 tracking-wide mb-1"
+                      th:text="${ingredient.section()}"></span>
+                <span class="leading-tight">
+                    <strong th:if="${ingredient.quantity() != null}" class="mr-1" th:text="${ingredient.quantity()}"></strong>
+                    <strong th:if="${ingredient.unit() != null}" class="mr-1" th:text="${ingredient.unit()}"></strong>
+                    <span th:text="${ingredient.item()}"></span>
+                </span>
+                <em th:if="${ingredient.preparation() != null}" class="text-sm text-slate-500"
+                    th:text="' — ' + ${ingredient.preparation()}"></em>
+            </li>
+        </ul>
     </section>
 
-    <!-- Steps -->
-    <section class="space-y-2">
-        <h2 class="text-xs uppercase tracking-wide font-montserrat text-slate-500">Steps</h2>
-        <ol class="list-decimal pl-5 space-y-2 font-lato text-sm text-slate-800">
-            <li th:each="st : ${recipe.steps}"
-                th:text="${st.text}">Step</li>
+    <section>
+        <h3 class="text-lg font-semibold mb-3 tracking-wide uppercase text-slate-600">Steps</h3>
+        <ol class="space-y-3 list-decimal list-inside leading-relaxed">
+            <li th:each="step : ${recipe.steps()}" th:text="${step.text()}"></li>
         </ol>
     </section>
 
-    <!-- Notes -->
-    <section th:if="${recipe.notes != null and !recipe.notes.isEmpty()}"
-             class="space-y-2">
-        <h2 class="text-xs uppercase tracking-wide font-montserrat text-slate-500">Notes</h2>
-        <div class="font-lato text-sm text-slate-700">
-            <div th:each="n : ${recipe.notes}"
-                 th:text="${n}"
-                 class="leading-6"></div>
-        </div>
+    <section th:if="${recipe.notes() != null and !#lists.isEmpty(recipe.notes())}">
+        <h3 class="text-lg font-semibold mb-3 tracking-wide uppercase text-slate-600">Notes</h3>
+        <ul class="space-y-1 text-sm">
+            <li th:each="note : ${recipe.notes()}" th:text="${note}"></li>
+        </ul>
     </section>
 
+    <div th:if="${recipe.source() != null}" class="text-xs uppercase tracking-wide text-slate-500">
+        <span>Source:</span>
+        <span th:text="${recipe.source()}"></span>
+    </div>
 </div>
-
-</body>
-</html>

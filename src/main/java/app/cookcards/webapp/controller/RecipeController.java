@@ -127,8 +127,7 @@ public class RecipeController {
     public enum Template {
         CLASSIC("classic"),
         MINIMAL("minimal"),
-        MODERN("modern"),
-        SUPER_PREMIUM_LUXURY("super_premium_luxury");
+        CARD("card");
 
         private final String code;
 
