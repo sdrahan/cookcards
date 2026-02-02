@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title th:text="${recipe.title} + ' | Cookcards'">Recipe | Cookcards</title>
+</head>
+<body class="min-h-screen bg-white">
+
+<div th:replace="~{fragments/nav :: topnav}"></div>
+
+<main class="max-w-5xl mx-auto px-6 py-12 space-y-6">
+    <div>
+        <p class="text-sm font-lato text-slate-500">Recipe</p>
+        <h1 class="text-3xl font-semibold font-montserrat text-slate-800" th:text="${recipe.title}">Recipe title</h1>
+    </div>
+
+    <div class="flex items-center gap-4">
+        <a th:href="@{/recipes/{id}/edit(id=${recipe.id})}"
+           class="text-sm font-lato text-slate-700 hover:text-slate-900">
+            Edit
+        </a>
+        <a th:href="@{/recipes/{id}/print(id=${recipe.id})}"
+           class="text-sm font-lato text-slate-700 hover:text-slate-900">
+            Print
+        </a>
+    </div>
+
+    <div class="rounded-lg border border-dashed border-slate-300 p-6 text-sm font-lato text-slate-600">
+        Placeholder recipe view. Full recipe content will be implemented in the next flow.
+    </div>
+</main>
+
+</body>
+</html>

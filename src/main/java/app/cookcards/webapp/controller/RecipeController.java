@@ -22,14 +22,6 @@ public class RecipeController {
         this.recipeParsingService = recipeParsingService;
     }
 
-    @GetMapping("/")
-    public String index(Model model) {
-        if (!model.containsAttribute("parseRequest")) {
-            model.addAttribute("parseRequest", new ParseRequest("", "/parse"));
-        }
-        return "index";
-    }
-
     // For now: ONLY freetext is implemented.
     @PostMapping("/parse")
     public String parse(@ModelAttribute("parseRequest") @Valid ParseRequest parseRequest,
