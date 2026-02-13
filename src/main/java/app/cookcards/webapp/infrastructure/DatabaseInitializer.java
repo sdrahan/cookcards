@@ -26,17 +26,17 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        User demoUser = ensureUser("demo@cookcards.app", "password123");
+        User demoUser = ensureUser("demo@cookcards.app", "123");
         ensureRecipes(demoUser, List.of(
                 "Spicy Chickpea Stew",
                 "Lemon Herb Salmon",
                 "No-Knead Bread"
         ));
 
-        User emptyUser = ensureUser("empty@cookcards.app", "password123");
+        User emptyUser = ensureUser("empty@cookcards.app", "123");
         ensureRecipes(emptyUser, List.of());
 
-        User adminUser = ensureUser("admin@cookcards.app", "password123");
+        User adminUser = ensureUser("admin@cookcards.app", "123");
         ensureRecipes(adminUser, List.of("Admin Test Recipe"));
 
         LOGGER.info("Done initializing database");
@@ -44,10 +44,14 @@ public class DatabaseInitializer implements CommandLineRunner {
     }
 
     private User ensureUser(String email, String password) {
+        User user;
         if (userService.emailExists(email)) {
-            return userService.requireByEmail(email);
+            user = userService.requireByEmail(email);
+        } else {
+            user = userService.createUser(email, password);
         }
-        return userService.createUser(email, password);
+        userService.getOrCreateSettingsByEmail(email);
+        return user;
     }
 
     private void ensureRecipes(User user, List<String> titles) {

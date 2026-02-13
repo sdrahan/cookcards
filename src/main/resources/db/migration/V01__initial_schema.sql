@@ -31,3 +31,19 @@ CREATE TABLE recipes
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
+
+CREATE TABLE user_settings
+(
+    id              BIGINT                                    NOT NULL AUTO_INCREMENT,
+    user_id         BIGINT                                    NOT NULL,
+    uuid            CHAR(36)                                  NOT NULL,
+    units_mode      ENUM ('METRIC', 'IMPERIAL', 'ORIGINAL')  NOT NULL DEFAULT 'ORIGINAL',
+    target_language ENUM ('ENGLISH', 'GERMAN', 'RUSSIAN', 'ORIGINAL') NOT NULL DEFAULT 'ORIGINAL',
+
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_user_settings_uuid (uuid),
+    UNIQUE KEY uq_user_settings_user_id (user_id),
+    CONSTRAINT fk_user_settings_user FOREIGN KEY (user_id) REFERENCES users (id)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;

@@ -3,8 +3,11 @@ package app.cookcards.webapp.controller;
 
 import app.cookcards.webapp.dto.RecipeDTO;
 import app.cookcards.webapp.service.RecipeParsingService;
+import app.cookcards.webapp.user.UserService;
+import app.cookcards.webapp.user.UserSettings;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -17,15 +20,18 @@ public class RecipeController {
     public static final String SESSION_RECIPE_KEY = "recipe";
 
     private final RecipeParsingService recipeParsingService;
+    private final UserService userService;
 
-    public RecipeController(RecipeParsingService recipeParsingService) {
+    public RecipeController(RecipeParsingService recipeParsingService, UserService userService) {
         this.recipeParsingService = recipeParsingService;
+        this.userService = userService;
     }
 
     // For now: ONLY freetext is implemented.
     @PostMapping("/parse")
     public String parse(@ModelAttribute("parseRequest") @Valid ParseRequest parseRequest,
                         BindingResult bindingResult,
+                        Authentication authentication,
                         HttpSession session,
                         Model model) {
 
@@ -38,7 +44,12 @@ public class RecipeController {
             return "index";
         }
 
-        RecipeDTO recipe = recipeParsingService.parseFromFreeText(parseRequest.freeText().trim());
+        UserSettings settings = userService.getOrCreateSettingsByEmail(authentication.getName());
+        RecipeDTO recipe = recipeParsingService.parseFromFreeText(
+                parseRequest.freeText().trim(),
+                settings.getUnitsMode(),
+                settings.getTargetLanguage()
+        );
 
         session.setAttribute(SESSION_RECIPE_KEY, recipe);
 

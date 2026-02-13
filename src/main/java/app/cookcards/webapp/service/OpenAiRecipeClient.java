@@ -1,6 +1,8 @@
 package app.cookcards.webapp.service;
 
 import app.cookcards.webapp.dto.RecipeDTO;
+import app.cookcards.webapp.user.TargetLanguage;
+import app.cookcards.webapp.user.UnitsMode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,8 +29,11 @@ public class OpenAiRecipeClient {
         this.model = model;
     }
 
-    public RecipeDTO parseRecipeFromText(String rawText) {
-        Map<String, Object> requestBody = buildResponsesRequest(rawText);
+    public RecipeDTO parseRecipeFromText(String rawText, UnitsMode unitsMode, TargetLanguage targetLanguage) {
+        UnitsMode effectiveUnitsMode = unitsMode == null ? UnitsMode.ORIGINAL : unitsMode;
+        TargetLanguage effectiveTargetLanguage = targetLanguage == null ? TargetLanguage.ORIGINAL : targetLanguage;
+
+        Map<String, Object> requestBody = buildResponsesRequest(rawText, effectiveUnitsMode, effectiveTargetLanguage);
 
         String responseJson = openAi.post()
                 .uri("/responses")
@@ -57,14 +62,26 @@ public class OpenAiRecipeClient {
      * Build Responses API request with Structured Outputs (strict json_schema).
      * Docs: Responses API + text.format json_schema. :contentReference[oaicite:2]{index=2}
      */
-    private Map<String, Object> buildResponsesRequest(String rawText) {
-        // System prompt: multilingual, do NOT translate
+    private Map<String, Object> buildResponsesRequest(String rawText, UnitsMode unitsMode, TargetLanguage targetLanguage) {
+        String unitsInstruction = switch (unitsMode) {
+            case METRIC -> "Convert all measurable ingredient quantities and cooking temperatures to metric units.";
+            case IMPERIAL -> "Convert all measurable ingredient quantities and cooking temperatures to imperial units.";
+            case ORIGINAL -> "Keep all units exactly as in source text. Do not convert units.";
+        };
+        String languageInstruction = switch (targetLanguage) {
+            case ENGLISH -> "Translate title, ingredients, and steps to English.";
+            case GERMAN -> "Translate title, ingredients, and steps to German.";
+            case RUSSIAN -> "Translate title, ingredients, and steps to Russian.";
+            case ORIGINAL -> "Keep text in original source language. Do not translate.";
+        };
+
         String system = """
                 You are a careful recipe parser.
                 The recipe can be in ANY language (e.g., Russian, Ukrainian, English).
-                DO NOT translate anything. Preserve original wording, units, punctuation, and ingredient names.
+                %s
+                %s
                 Return ONLY JSON matching the schema. No markdown. No commentary.
-                """;
+                """.formatted(unitsInstruction, languageInstruction);
 
         // User instructions: just provide raw text as-is
         String user = "RAW_TEXT:\n" + rawText;

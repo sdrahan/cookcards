@@ -30,6 +30,9 @@ public class User {
     @Column(nullable = false, length = 50)
     private String role;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private UserSettings settings;
+
     @PrePersist
     void onCreate() {
         LocalDateTime now = LocalDateTime.now();
@@ -94,5 +97,16 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public UserSettings getSettings() {
+        return settings;
+    }
+
+    public void setSettings(UserSettings settings) {
+        this.settings = settings;
+        if (settings != null) {
+            settings.setUser(this);
+        }
     }
 }

@@ -30,6 +30,7 @@ public class UserService {
         user.setEmail(normalizedEmail);
         user.setPasswordHash(passwordEncoder.encode(rawPassword));
         user.setRole("USER");
+        user.setSettings(new UserSettings());
         return userRepository.save(user);
     }
 
@@ -37,6 +38,23 @@ public class UserService {
         String normalizedEmail = normalizeEmail(email);
         return userRepository.findByEmail(normalizedEmail)
                 .orElseThrow(() -> new IllegalStateException("User not found for email: " + normalizedEmail));
+    }
+
+    @Transactional
+    public UserSettings getOrCreateSettingsByEmail(String email) {
+        User user = requireByEmail(email);
+        if (user.getSettings() == null) {
+            user.setSettings(new UserSettings());
+            userRepository.save(user);
+        }
+        return user.getSettings();
+    }
+
+    @Transactional
+    public void updateSettings(String email, UnitsMode unitsMode, TargetLanguage targetLanguage) {
+        UserSettings settings = getOrCreateSettingsByEmail(email);
+        settings.setUnitsMode(unitsMode == null ? UnitsMode.ORIGINAL : unitsMode);
+        settings.setTargetLanguage(targetLanguage == null ? TargetLanguage.ORIGINAL : targetLanguage);
     }
 
     public static String normalizeEmail(String email) {
