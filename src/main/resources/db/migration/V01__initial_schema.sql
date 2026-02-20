@@ -22,6 +22,7 @@ CREATE TABLE recipes
     id         BIGINT       NOT NULL AUTO_INCREMENT,
     user_id    BIGINT       NOT NULL,
     title      VARCHAR(255) NOT NULL,
+    recipe_json TEXT        NOT NULL,
     created_at DATETIME     NULL,
     updated_at DATETIME     NULL,
 

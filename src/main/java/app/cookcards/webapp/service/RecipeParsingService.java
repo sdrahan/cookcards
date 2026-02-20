@@ -1,6 +1,5 @@
 package app.cookcards.webapp.service;
 
-import app.cookcards.webapp.dto.RecipeDTO;
 import app.cookcards.webapp.user.TargetLanguage;
 import app.cookcards.webapp.user.UnitsMode;
 import org.springframework.stereotype.Service;
@@ -14,7 +13,14 @@ public class RecipeParsingService {
         this.openAiRecipeClient = openAiRecipeClient;
     }
 
-    public RecipeDTO parseFromFreeText(String freeText, UnitsMode unitsMode, TargetLanguage targetLanguage) {
+    public boolean isValidFoodRecipe(String freeText) {
+        if (freeText == null || freeText.trim().isEmpty()) {
+            return false;
+        }
+        return openAiRecipeClient.isValidFoodRecipe(freeText.trim());
+    }
+
+    public ParsedRecipeResult parseFromFreeText(String freeText, UnitsMode unitsMode, TargetLanguage targetLanguage) {
         if (freeText == null || freeText.trim().isEmpty()) {
             throw new IllegalArgumentException("freeText is empty");
         }

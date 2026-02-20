@@ -20,6 +20,10 @@ public class Recipe {
     @Column(nullable = false)
     private String title;
 
+    @Lob
+    @Column(name = "recipe_json", nullable = false, columnDefinition = "TEXT")
+    private String recipeJson;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -58,6 +62,14 @@ public class Recipe {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getRecipeJson() {
+        return recipeJson;
+    }
+
+    public void setRecipeJson(String recipeJson) {
+        this.recipeJson = recipeJson;
     }
 
     public LocalDateTime getCreatedAt() {

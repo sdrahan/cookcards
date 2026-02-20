@@ -59,7 +59,26 @@ public class DatabaseInitializer implements CommandLineRunner {
             return;
         }
         for (String title : titles) {
-            recipeService.createRecipe(user, title);
+            recipeService.createRecipe(user, title, seedRecipeJson(title));
         }
+    }
+
+    private String seedRecipeJson(String title) {
+        String escapedTitle = title.replace("\\", "\\\\").replace("\"", "\\\"");
+        return """
+                {
+                  "name":"%s",
+                  "description":"Simple seeded recipe.",
+                  "ingredients":["1 cup water","1 pinch salt"],
+                  "instructions":[
+                    {
+                      "steps":[
+                        {"text":"Add water to a pot."},
+                        {"text":"Heat and stir in salt."}
+                      ]
+                    }
+                  ]
+                }
+                """.formatted(escapedTitle).replace("\n", "").replace("  ", "");
     }
 }

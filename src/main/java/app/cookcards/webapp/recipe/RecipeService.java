@@ -26,9 +26,15 @@ public class RecipeService {
 
     @Transactional
     public Recipe createRecipe(User user, String title) {
+        return createRecipe(user, title, minimalRecipeJson(title));
+    }
+
+    @Transactional
+    public Recipe createRecipe(User user, String title, String recipeJson) {
         Recipe recipe = new Recipe();
         recipe.setUser(user);
         recipe.setTitle(title);
+        recipe.setRecipeJson(recipeJson);
         return recipeRepository.save(recipe);
     }
 
@@ -40,5 +46,12 @@ public class RecipeService {
         }
         recipeRepository.delete(recipe.get());
         return true;
+    }
+
+    private String minimalRecipeJson(String title) {
+        String safeTitle = title == null || title.isBlank() ? "Untitled recipe" : title.trim();
+        String escapedTitle = safeTitle.replace("\\", "\\\\").replace("\"", "\\\"");
+        return "{\"name\":\"" + escapedTitle
+                + "\",\"ingredients\":[\"1 item\"],\"instructions\":[{\"steps\":[{\"text\":\"Add instructions.\"}]}]}";
     }
 }

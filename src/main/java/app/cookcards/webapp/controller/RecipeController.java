@@ -1,9 +1,14 @@
 package app.cookcards.webapp.controller;
 
 
-import app.cookcards.webapp.dto.RecipeDTO;
+import app.cookcards.webapp.dto.CookcardsRecipeDTO;
+import app.cookcards.webapp.recipe.Recipe;
+import app.cookcards.webapp.recipe.RecipeService;
+import app.cookcards.webapp.service.OpenAiRecipeClient;
 import app.cookcards.webapp.service.RecipeParsingService;
+import app.cookcards.webapp.service.ParsedRecipeResult;
 import app.cookcards.webapp.user.UserService;
+import app.cookcards.webapp.user.User;
 import app.cookcards.webapp.user.UserSettings;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -17,138 +22,99 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class RecipeController {
 
-    public static final String SESSION_RECIPE_KEY = "recipe";
+    public static final String SESSION_PARSED_RECIPE_KEY = "parsedRecipe";
+    public static final String SESSION_PARSED_RECIPE_JSON_KEY = "parsedRecipeJson";
 
     private final RecipeParsingService recipeParsingService;
     private final UserService userService;
+    private final RecipeService recipeService;
 
-    public RecipeController(RecipeParsingService recipeParsingService, UserService userService) {
+    public RecipeController(RecipeParsingService recipeParsingService,
+                            UserService userService,
+                            RecipeService recipeService) {
         this.recipeParsingService = recipeParsingService;
         this.userService = userService;
+        this.recipeService = recipeService;
     }
 
-    // For now: ONLY freetext is implemented.
-    @PostMapping("/parse")
-    public String parse(@ModelAttribute("parseRequest") @Valid ParseRequest parseRequest,
+    @GetMapping("/recipes/new")
+    public String addRecipePage(Model model) {
+        if (!model.containsAttribute("addRecipeForm")) {
+            model.addAttribute("addRecipeForm", new AddRecipeForm());
+        }
+        return "add-recipe";
+    }
+
+    @PostMapping("/recipes/new")
+    public String parseRecipe(@ModelAttribute("addRecipeForm") @Valid AddRecipeForm addRecipeForm,
                         BindingResult bindingResult,
                         Authentication authentication,
                         HttpSession session,
                         Model model) {
+        String freeText = addRecipeForm.freeText() == null ? "" : addRecipeForm.freeText().trim();
 
-        // Basic validation: require at least one input later; for now only freetext
-        if (!StringUtils.hasText(parseRequest.freeText())) {
-            bindingResult.rejectValue("freeText", "freeText.empty", "Please paste a recipe text.");
+        if (!StringUtils.hasText(freeText) || freeText.length() < 20) {
+            bindingResult.rejectValue("freeText", "freeText.minLength", "Please paste at least 20 characters of recipe text.");
         }
 
         if (bindingResult.hasErrors()) {
-            return "index";
+            return "add-recipe";
         }
 
-        UserSettings settings = userService.getOrCreateSettingsByEmail(authentication.getName());
-        RecipeDTO recipe = recipeParsingService.parseFromFreeText(
-                parseRequest.freeText().trim(),
-                settings.getUnitsMode(),
-                settings.getTargetLanguage()
-        );
-
-        session.setAttribute(SESSION_RECIPE_KEY, recipe);
-
-        // Default template is classic
-        return "redirect:/review?template=classic";
-    }
-
-    // shows editable fields + template selector + preview.
-    @GetMapping("/review")
-    public String review(@RequestParam(name = "template", required = false, defaultValue = "classic") String template,
-                         HttpSession session,
-                         Model model) {
-
-        RecipeDTO recipe = (RecipeDTO) session.getAttribute(SESSION_RECIPE_KEY);
-        if (recipe == null) {
-            return "redirect:/";
-        }
-
-        Template tpl = Template.from(template);
-
-        // Form backing object (editable)
-        ReviewForm form = ReviewForm.fromRecipe(recipe, tpl);
-
-        model.addAttribute("recipe", recipe);
-        model.addAttribute("reviewForm", form);
-        model.addAttribute("template", tpl.code());
-        model.addAttribute("availableTemplates", Template.values());
-
-        // You can use this in Thymeleaf to include the correct preview partial:
-        // th:replace="~{templates/${template} :: preview(...) }"
-        model.addAttribute("previewFragment", "templates/" + tpl.code());
-
-        return "review";
-    }
-
-    // updates session with user edits, stays on review.
-    // Supports template switching via ?template=classic|minimal|modern|super_premium_luxury
-    @PostMapping("/review")
-    public String updateReview(@RequestParam(name = "template", required = false, defaultValue = "classic") String template,
-                               @ModelAttribute("reviewForm") @Valid ReviewForm reviewForm,
-                               BindingResult bindingResult,
-                               HttpSession session,
-                               Model model) {
-
-        RecipeDTO existing = (RecipeDTO) session.getAttribute(SESSION_RECIPE_KEY);
-        if (existing == null) {
-            return "redirect:/";
-        }
-
-        Template tpl = Template.from(template);
-
-        if (bindingResult.hasErrors()) {
-            model.addAttribute("template", tpl.code());
-            model.addAttribute("availableTemplates", Template.values());
-            model.addAttribute("previewFragment", "templates/" + tpl.code());
-            return "review";
-        }
-
-        // Convert editable form back to DTO and store in session
-        RecipeDTO updated = reviewForm.toRecipeDto(existing);
-        session.setAttribute(SESSION_RECIPE_KEY, updated);
-
-        // Stay on review and preserve template
-        return "redirect:/review?template=" + tpl.code();
-    }
-
-    // INPUT FORM for / (index)
-    public record ParseRequest(
-            String freeText,
-            String url
-            // TODO later: MultipartFile[] images
-    ) {
-        public ParseRequest() {
-            this("", "");
-        }
-    }
-
-    public enum Template {
-        CLASSIC("classic"),
-        MINIMAL("minimal"),
-        CARD("card");
-
-        private final String code;
-
-        Template(String code) {
-            this.code = code;
-        }
-
-        public String code() {
-            return code;
-        }
-
-        public static Template from(String raw) {
-            if (!StringUtils.hasText(raw)) return CLASSIC;
-            String v = raw.trim().toLowerCase();
-            for (Template t : values()) {
-                if (t.code.equals(v)) return t;
+        ParsedRecipeResult parseResult;
+        try {
+            boolean validRecipe = recipeParsingService.isValidFoodRecipe(freeText);
+            if (!validRecipe) {
+                bindingResult.rejectValue("freeText", "freeText.invalidRecipe", "Input does not look like a valid food recipe.");
+                return "add-recipe";
             }
-            return CLASSIC;
+
+            UserSettings settings = userService.getOrCreateSettingsByEmail(authentication.getName());
+            parseResult = recipeParsingService.parseFromFreeText(
+                    freeText,
+                    settings.getUnitsMode(),
+                    settings.getTargetLanguage()
+            );
+        } catch (OpenAiRecipeClient.OpenAiException ex) {
+            bindingResult.reject("parse.failed", "Could not parse recipe right now. Please try again.");
+            return "add-recipe";
+        }
+
+        session.setAttribute(SESSION_PARSED_RECIPE_KEY, parseResult.recipe());
+        session.setAttribute(SESSION_PARSED_RECIPE_JSON_KEY, parseResult.recipeJson());
+
+        return "redirect:/recipes/preview";
+    }
+
+    @GetMapping("/recipes/preview")
+    public String previewRecipe(HttpSession session, Model model) {
+        CookcardsRecipeDTO recipe = (CookcardsRecipeDTO) session.getAttribute(SESSION_PARSED_RECIPE_KEY);
+        if (recipe == null) {
+            return "redirect:/recipes/new";
+        }
+        model.addAttribute("recipe", recipe);
+        return "recipe-preview";
+    }
+
+    @PostMapping("/recipes/preview/save")
+    public String saveParsedRecipe(Authentication authentication, HttpSession session) {
+        CookcardsRecipeDTO recipe = (CookcardsRecipeDTO) session.getAttribute(SESSION_PARSED_RECIPE_KEY);
+        String recipeJson = (String) session.getAttribute(SESSION_PARSED_RECIPE_JSON_KEY);
+        if (recipe == null || !StringUtils.hasText(recipeJson)) {
+            return "redirect:/recipes/new";
+        }
+
+        User user = userService.requireByEmail(authentication.getName());
+        Recipe saved = recipeService.createRecipe(user, recipe.name(), recipeJson);
+
+        session.removeAttribute(SESSION_PARSED_RECIPE_KEY);
+        session.removeAttribute(SESSION_PARSED_RECIPE_JSON_KEY);
+        return "redirect:/recipes/" + saved.getId();
+    }
+
+    public record AddRecipeForm(String freeText) {
+        public AddRecipeForm() {
+            this("");
         }
     }
 }
