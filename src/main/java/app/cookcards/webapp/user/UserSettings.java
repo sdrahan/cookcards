@@ -1,19 +1,19 @@
 package app.cookcards.webapp.user;
 
-import jakarta.persistence.*;
-
-import java.util.UUID;
+import app.cookcards.webapp.entity.BaseEntityWithUuid;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user_settings")
-public class UserSettings {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, unique = true, length = 36)
-    private String uuid;
+public class UserSettings extends BaseEntityWithUuid {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "units_mode", nullable = false, length = 16)
@@ -28,28 +28,13 @@ public class UserSettings {
     private User user;
 
     @PrePersist
-    void onCreate() {
-        if (uuid == null) {
-            uuid = UUID.randomUUID().toString();
-        }
+    protected void applyDefaults() {
         if (unitsMode == null) {
             unitsMode = UnitsMode.ORIGINAL;
         }
         if (targetLanguage == null) {
             targetLanguage = TargetLanguage.ORIGINAL;
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
     }
 
     public UnitsMode getUnitsMode() {

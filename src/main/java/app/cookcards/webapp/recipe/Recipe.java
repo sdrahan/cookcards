@@ -1,17 +1,18 @@
 package app.cookcards.webapp.recipe;
 
+import app.cookcards.webapp.entity.BaseEntityWithUuid;
 import app.cookcards.webapp.user.User;
-import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "recipes")
-public class Recipe {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Recipe extends BaseEntityWithUuid {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -23,30 +24,6 @@ public class Recipe {
     @Lob
     @Column(name = "recipe_json", nullable = false, columnDefinition = "TEXT")
     private String recipeJson;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    @PrePersist
-    void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        if (createdAt == null) {
-            createdAt = now;
-        }
-        updatedAt = now;
-    }
-
-    @PreUpdate
-    void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
 
     public User getUser() {
         return user;
@@ -70,21 +47,5 @@ public class Recipe {
 
     public void setRecipeJson(String recipeJson) {
         this.recipeJson = recipeJson;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

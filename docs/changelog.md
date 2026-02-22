@@ -21,6 +21,18 @@ Condensed log of spec-impacting changes and important decisions.
 
 ---
 
+### 2026-02-22 — Entity inheritance unification for id/audit/uuid
+- Type: `decision`
+- Task: N/A
+- Specs: `docs/specs/postlogin_flow.md`
+- Summary:
+  - Unified persistence model by making `User`, `UserSettings`, and `Recipe` inherit from shared mapped superclasses.
+  - Centralized UUID generation in `BaseEntityWithUuid` lifecycle callbacks instead of per-service assignment.
+  - Standardized shared audit mapping (`created_at`, `updated_at`) in `BaseEntity`.
+- Impact:
+  - Removes duplicated entity boilerplate and keeps table constraints aligned with entity behavior (including `recipes.uuid`).
+  - No route/API behavior changes; persistence creation paths continue to work with inherited fields.
+
 ### 2026-02-22 — Documentation structure and workflow consolidation
 - Type: `decision`
 - Task: N/A
