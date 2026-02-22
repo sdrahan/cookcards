@@ -6,6 +6,10 @@
 - MySQL 8, Hibernate, Flyway
 - Docker Compose
 
+## Documentation
+- Entry point for contributors/agents: `AGENTS.md`
+- Project docs map: `docs/README.md`
+
 ---
 
 ## Getting Started (Local)
@@ -28,7 +32,7 @@ docker run --name cookcards-mysql -p 3306:3306 \
   -d mysql:8.0
 ```
 
-** Option B: Local**
+**Option B: Local MySQL server**
 ```
 CREATE DATABASE IF NOT EXISTS `cookcards`;
 CREATE USER IF NOT EXISTS 'cookcards'@'%' IDENTIFIED BY 'cookcards';
@@ -38,6 +42,11 @@ GRANT ALL PRIVILEGES ON `cookcards`.* TO 'cookcards'@'%';
 ### Run with local profile
 ```
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+```
+
+To add initial users and recipes use `init-db` profile:
+```
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local,init-db
 ```
 
 ### During development

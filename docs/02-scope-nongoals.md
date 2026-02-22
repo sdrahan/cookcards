@@ -3,18 +3,14 @@
 - Structuring recipe data
 - Rendering printable HTML templates
 - Session-based editing and preview
-
-## Explicit Non-Goals
-- User accounts (post-MVP)
-- Persistent recipe storage (post-MVP)
-- PDF generation (browser print only)
-- Monetization
-- Collaboration features
+- User accounts
+- Persistent recipe storage
+- PDF generation
+- Monetization for using premium templates, extended storage and advanced parsing
 
 ## Intentionally Excluded
 - Offline support
 - API access
 - Third-party integrations
 - Advanced editing tools
-
-Simplicity is a feature.
+- Collaboration features

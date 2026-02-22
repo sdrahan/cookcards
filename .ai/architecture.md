@@ -2,7 +2,6 @@
 - Single monolithic Spring Boot application
 - Server-rendered HTML using Thymeleaf
 - Session-based state (no SPA, no REST-first design)
-- MySQL only if explicitly required
 - Docker Compose for all local and prod environments
 
 ## Layering Rules
@@ -15,6 +14,7 @@
 - Java 21
 - Spring Boot
 - Thymeleaf
+- Tailwind CSS
 - MySQL + Flyway
 - Docker / Docker Compose
 
@@ -26,5 +26,3 @@
 - Client-side state management
 - Hidden persistence
 - Implicit background jobs
-
-This is a **simple, inspectable, synchronous system**.

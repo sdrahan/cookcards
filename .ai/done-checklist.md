@@ -3,7 +3,7 @@
 Every change must satisfy **all** applicable items below.
 
 ### Specification
-- [ ] Feature is described or updated in `docs/`
+- [ ] Feature is described or updated in `docs/specs`
 - [ ] Scope and non-goals are explicit
 - [ ] Edge cases are documented
 
@@ -35,5 +35,3 @@ Every change must satisfy **all** applicable items below.
 - [ ] Large input
 - [ ] Invalid input
 - [ ] Session expiration
-
-If any checkbox is unchecked, the work is **not done**.

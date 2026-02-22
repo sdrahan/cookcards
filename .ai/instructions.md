@@ -1,32 +1,10 @@
 ## Purpose
-This directory defines how AI assistants must operate in this repository.  
-These rules are **binding**. Violations are bugs.
+Rules in `.ai/` define how AI assistants should implement changes in this repository.
 
-## How to Work in This Repository
-- This repository is **spec-first**.
-- You implement code **only** after a spec exists in `docs/`.
-- If behavior is unclear, prefer **explicitness over cleverness**.
-- Optimize for correctness, simplicity, and debuggability.
-- Assume this is a long-lived codebase, not a demo.
+## Core rules
+- Work spec-first: update behavior in `docs/specs/` when implementation changes.
+- Add a concise entry to `docs/changelog.md` for spec-impacting changes and important decisions.
+- Follow architecture and coding constraints in `.ai/architecture.md` and `.ai/style.md`.
+- Meet the completion checklist in `.ai/done-checklist.md` before considering work done.
 
-## Mandatory Rules
-- Never change behavior without updating specs.
-- Never introduce new dependencies without architectural justification.
-- Never persist data unless explicitly specified.
-- Never add abstraction layers “just in case”.
-- Never rely on undocumented framework magic.
-
-## Precedence Rules (Highest → Lowest)
-1. `.ai/*` files (this directory)
-2. `docs/*` specifications
-3. Existing code
-4. Framework defaults
-5. Personal preference
-
-If two rules conflict, the **higher-precedence source wins**.
-
-## When in Doubt
-- Prefer fewer features over more.
-- Prefer clarity over flexibility.
-- Prefer deletion over addition.
-- Prefer boring solutions.
+For document map, task flow, and precedence rules, see `AGENTS.md`.

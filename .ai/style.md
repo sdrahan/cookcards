@@ -32,5 +32,3 @@ No abbreviations unless industry-standard.
     - passwords
     - full recipe text
     - OpenAI prompts or responses verbatim
-
-Logging is diagnostic, not narrative.

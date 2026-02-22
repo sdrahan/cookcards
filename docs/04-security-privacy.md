@@ -23,5 +23,3 @@
 - Never log images
 - Never log credentials
 - Logs are diagnostic only
-
-Privacy by default.

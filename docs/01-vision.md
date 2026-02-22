@@ -20,5 +20,3 @@ CookCards is a small web application that turns unstructured recipes
 - A nutrition tracker
 - A mobile app
 - A content management system
-
-This is a **personal utility**, not a platform.

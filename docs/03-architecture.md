@@ -21,5 +21,5 @@ CookCards is a monolithic Spring Boot application with server-rendered HTML.
 ## Deployment
 - Single container
 - Docker Compose
-- One database (optional)
+- One database
 - Stateless except HTTP session
