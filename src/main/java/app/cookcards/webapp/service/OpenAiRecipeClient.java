@@ -1,6 +1,6 @@
 package app.cookcards.webapp.service;
 
-import app.cookcards.webapp.dto.CookcardsRecipeDTO;
+import app.cookcards.webapp.dto.RecipeDTO;
 import app.cookcards.webapp.user.TargetLanguage;
 import app.cookcards.webapp.user.UnitsMode;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -171,10 +171,10 @@ public class OpenAiRecipeClient {
 
         String outputJson = callResponsesApi(requestBody);
         try {
-            CookcardsRecipeDTO recipe = mapper.readValue(outputJson, CookcardsRecipeDTO.class);
+            RecipeDTO recipe = mapper.readValue(outputJson, RecipeDTO.class);
             return new ParsedRecipeResult(recipe, outputJson);
         } catch (JsonProcessingException e) {
-            throw new OpenAiException("Failed to parse OpenAI response JSON into CookcardsRecipeDTO: " + e.getMessage(), e);
+            throw new OpenAiException("Failed to parse OpenAI response JSON into RecipeDTO: " + e.getMessage(), e);
         }
     }
 
@@ -253,7 +253,7 @@ public class OpenAiRecipeClient {
     private Map<String, Object> schemaDefinition() {
         return Map.of(
                 "type", "json_schema",
-                "name", "cookcards_recipe_v1",
+                "name", "recipe_v1",
                 "strict", true,
                 "schema", Map.of(
                         "type", "object",

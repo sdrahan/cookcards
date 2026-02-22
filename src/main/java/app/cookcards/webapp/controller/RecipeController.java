@@ -1,7 +1,7 @@
 package app.cookcards.webapp.controller;
 
 
-import app.cookcards.webapp.dto.CookcardsRecipeDTO;
+import app.cookcards.webapp.dto.RecipeDTO;
 import app.cookcards.webapp.recipe.Recipe;
 import app.cookcards.webapp.recipe.RecipeService;
 import app.cookcards.webapp.service.OpenAiRecipeClient;
@@ -88,7 +88,7 @@ public class RecipeController {
 
     @GetMapping("/recipes/preview")
     public String previewRecipe(HttpSession session, Model model) {
-        CookcardsRecipeDTO recipe = (CookcardsRecipeDTO) session.getAttribute(SESSION_PARSED_RECIPE_KEY);
+        RecipeDTO recipe = (RecipeDTO) session.getAttribute(SESSION_PARSED_RECIPE_KEY);
         if (recipe == null) {
             return "redirect:/recipes/new";
         }
@@ -98,7 +98,7 @@ public class RecipeController {
 
     @PostMapping("/recipes/preview/save")
     public String saveParsedRecipe(Authentication authentication, HttpSession session) {
-        CookcardsRecipeDTO recipe = (CookcardsRecipeDTO) session.getAttribute(SESSION_PARSED_RECIPE_KEY);
+        RecipeDTO recipe = (RecipeDTO) session.getAttribute(SESSION_PARSED_RECIPE_KEY);
         String recipeJson = (String) session.getAttribute(SESSION_PARSED_RECIPE_JSON_KEY);
         if (recipe == null || !StringUtils.hasText(recipeJson)) {
             return "redirect:/recipes/new";

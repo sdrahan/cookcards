@@ -1,9 +1,9 @@
 package app.cookcards.webapp.service;
 
-import app.cookcards.webapp.dto.CookcardsRecipeDTO;
+import app.cookcards.webapp.dto.RecipeDTO;
 
 public record ParsedRecipeResult(
-        CookcardsRecipeDTO recipe,
+        RecipeDTO recipe,
         String recipeJson
 ) {
 }
