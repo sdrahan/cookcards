@@ -40,7 +40,6 @@ public class DatabaseInitializer implements CommandLineRunner {
         ensureRecipes(adminUser, List.of("Admin Test Recipe"));
 
         LOGGER.info("Done initializing database");
-        System.exit(0);
     }
 
     private User ensureUser(String email, String password) {
