@@ -13,13 +13,14 @@
 
 <div th:replace="~{fragments/nav :: topnav}"></div>
 
-<main class="max-w-5xl mx-auto px-6 py-12 space-y-6">
-    <div>
+<main class="max-w-4xl mx-auto px-6 py-12 space-y-6">
+    <div class="space-y-2">
         <p class="text-sm font-lato text-slate-500">Recipe</p>
-        <h1 class="text-3xl font-semibold font-montserrat text-slate-800" th:text="${recipe.title}">Recipe title</h1>
+        <h1 class="text-3xl font-semibold font-montserrat text-slate-800" th:text="${recipeData.name()}">Recipe title</h1>
+        <p th:if="${!#strings.isEmpty(recipeData.description())}" class="text-slate-600 font-lato" th:text="${recipeData.description()}"></p>
     </div>
 
-    <div class="flex items-center gap-4">
+    <div th:if="${mode != 'print'}" class="flex items-center gap-4">
         <a th:href="@{/recipes/{id}/edit(id=${recipe.id})}"
            class="text-sm font-lato text-slate-700 hover:text-slate-900">
             Edit
@@ -30,9 +31,49 @@
         </a>
     </div>
 
-    <div class="rounded-lg border border-dashed border-slate-300 p-6 text-sm font-lato text-slate-600">
-        Placeholder recipe view. Full recipe content will be implemented in the next flow.
-    </div>
+    <section th:if="${!#strings.isEmpty(recipeData.recipeYield()) or !#strings.isEmpty(recipeData.prepTime()) or !#strings.isEmpty(recipeData.cookTime()) or !#strings.isEmpty(recipeData.totalTime()) or (recipeData.nutrition() != null and !#strings.isEmpty(recipeData.nutrition().calories()))}"
+             class="rounded-xl border border-slate-200 p-5 bg-slate-50">
+        <h2 class="text-xl font-semibold font-montserrat text-slate-800 mb-3">Details</h2>
+        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm font-lato text-slate-700">
+            <div th:if="${!#strings.isEmpty(recipeData.recipeYield())}">
+                <dt class="font-semibold text-slate-900">Yield</dt>
+                <dd th:text="${recipeData.recipeYield()}"></dd>
+            </div>
+            <div th:if="${!#strings.isEmpty(recipeData.prepTime())}">
+                <dt class="font-semibold text-slate-900">Prep time</dt>
+                <dd th:text="${recipeData.prepTime()}"></dd>
+            </div>
+            <div th:if="${!#strings.isEmpty(recipeData.cookTime())}">
+                <dt class="font-semibold text-slate-900">Cook time</dt>
+                <dd th:text="${recipeData.cookTime()}"></dd>
+            </div>
+            <div th:if="${!#strings.isEmpty(recipeData.totalTime())}">
+                <dt class="font-semibold text-slate-900">Total time</dt>
+                <dd th:text="${recipeData.totalTime()}"></dd>
+            </div>
+            <div th:if="${recipeData.nutrition() != null and !#strings.isEmpty(recipeData.nutrition().calories())}">
+                <dt class="font-semibold text-slate-900">Calories</dt>
+                <dd th:text="${recipeData.nutrition().calories()}"></dd>
+            </div>
+        </dl>
+    </section>
+
+    <section class="rounded-xl border border-slate-200 p-5 bg-white">
+        <h2 class="text-xl font-semibold font-montserrat text-slate-800 mb-3">Ingredients</h2>
+        <ul class="list-disc pl-6 space-y-1 font-lato text-slate-700">
+            <li th:each="ingredient : ${recipeData.ingredients()}" th:text="${ingredient}">Ingredient</li>
+        </ul>
+    </section>
+
+    <section class="rounded-xl border border-slate-200 p-5 bg-white space-y-4">
+        <h2 class="text-xl font-semibold font-montserrat text-slate-800">Instructions</h2>
+        <div th:each="section : ${recipeData.instructions()}" class="space-y-2">
+            <h3 th:if="${!#strings.isEmpty(section.name())}" class="font-semibold font-lato text-slate-700" th:text="${section.name()}"></h3>
+            <ol class="list-decimal pl-6 space-y-2 font-lato text-slate-700">
+                <li th:each="step : ${section.steps()}" th:text="${step.text()}"></li>
+            </ol>
+        </div>
+    </section>
 </main>
 
 </body>

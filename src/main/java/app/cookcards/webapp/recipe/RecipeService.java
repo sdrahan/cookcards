@@ -1,5 +1,8 @@
 package app.cookcards.webapp.recipe;
 
+import app.cookcards.webapp.dto.RecipeDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import app.cookcards.webapp.user.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,9 +14,11 @@ import java.util.Optional;
 public class RecipeService {
 
     private final RecipeRepository recipeRepository;
+    private final ObjectMapper objectMapper;
 
-    public RecipeService(RecipeRepository recipeRepository) {
+    public RecipeService(RecipeRepository recipeRepository, ObjectMapper objectMapper) {
         this.recipeRepository = recipeRepository;
+        this.objectMapper = objectMapper;
     }
 
     public List<Recipe> listForUser(User user) {
@@ -46,6 +51,31 @@ public class RecipeService {
         }
         recipeRepository.delete(recipe.get());
         return true;
+    }
+
+    public RecipeDTO parseRecipeJson(String recipeJson) {
+        try {
+            return objectMapper.readValue(recipeJson, RecipeDTO.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to parse persisted recipe JSON.", e);
+        }
+    }
+
+    public String serializeRecipeDto(RecipeDTO recipeDTO) {
+        try {
+            return objectMapper.writeValueAsString(recipeDTO);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Failed to serialize recipe DTO.", e);
+        }
+    }
+
+    @Transactional
+    public Recipe updateRecipe(User user, Long recipeId, RecipeDTO recipeDTO) {
+        Recipe recipe = recipeRepository.findByIdAndUser(recipeId, user)
+                .orElseThrow(() -> new IllegalStateException("Recipe not found for user."));
+        recipe.setTitle(recipeDTO.name());
+        recipe.setRecipeJson(serializeRecipeDto(recipeDTO));
+        return recipeRepository.save(recipe);
     }
 
     private String minimalRecipeJson(String title) {

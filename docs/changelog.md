@@ -21,6 +21,18 @@ Condensed log of spec-impacting changes and important decisions.
 
 ---
 
+### 2026-02-22 — Recipe Edit (Review & Fix) as canonical flow
+- Type: `spec-change`
+- Task: `docs/tasks/open/edit-recipe.md`
+- Specs: `docs/specs/recipe-edit.md`, `docs/specs/postlogin_flow.md`
+- Summary:
+  - Added a single Recipe Edit page for both post-parse review and editing existing recipes.
+  - Switched parse success redirect from preview to `/recipes/edit`; retained `/recipes/preview` routes as compatibility redirects.
+  - Defined save/cancel behavior, server-side validation, and unsaved-changes warning for the editor flow.
+- Impact:
+  - Recipe detail now renders structured persisted recipe JSON instead of placeholder content.
+  - Images, bulk paste, and drag-and-drop reorder are explicitly out of scope for MVP.
+
 ### 2026-02-22 — Entity inheritance unification for id/audit/uuid
 - Type: `decision`
 - Task: N/A

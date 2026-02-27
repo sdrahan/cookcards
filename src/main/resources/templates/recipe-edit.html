@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <title>Recipe edit | Cookcards</title>
+</head>
+<body class="min-h-screen bg-slate-50">
+
+<div th:replace="~{fragments/nav :: topnav}"></div>
+
+<main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-6">
+    <div class="space-y-2">
+        <p class="text-sm font-lato text-slate-500" th:text="${pageSubtitle}">Edit recipe</p>
+        <h1 class="text-3xl font-semibold font-montserrat text-slate-900">Recipe editor</h1>
+    </div>
+
+    <div class="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-1 w-fit">
+        <button type="button"
+                id="mode-edit-button"
+                class="px-4 py-2 rounded-lg text-sm font-semibold font-lato bg-slate-900 text-white">
+            Edit
+        </button>
+        <button type="button"
+                id="mode-preview-button"
+                class="px-4 py-2 rounded-lg text-sm font-semibold font-lato text-slate-700 hover:bg-slate-100">
+            Preview
+        </button>
+    </div>
+
+    <form id="recipe-edit-form" th:action="${saveAction}" method="post" th:object="${recipeEditForm}" class="space-y-6">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        <input type="hidden" th:field="*{sourceContext}">
+        <input type="hidden" th:field="*{recipeId}">
+
+        <section id="edit-panel" class="space-y-6">
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 space-y-4">
+                <div>
+                    <label for="name" class="block text-sm font-semibold font-lato text-slate-800 mb-2">Recipe name</label>
+                    <input id="name"
+                           type="text"
+                           th:field="*{name}"
+                           class="w-full rounded-lg border border-slate-300 px-3 py-2 font-lato text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p th:if="${#fields.hasErrors('name')}"
+                       th:errors="*{name}"
+                       class="mt-2 text-sm text-red-600 font-lato"></p>
+                </div>
+
+                <div>
+                    <label for="description" class="block text-sm font-semibold font-lato text-slate-800 mb-2">Description</label>
+                    <textarea id="description"
+                              th:field="*{description}"
+                              rows="3"
+                              class="w-full rounded-lg border border-slate-300 px-3 py-2 font-lato text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Optional short description"></textarea>
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+                <button type="button"
+                        id="details-toggle"
+                        class="w-full flex items-center justify-between text-left">
+                    <span class="text-lg font-semibold font-montserrat text-slate-900">Details (optional)</span>
+                    <span id="details-toggle-icon" class="text-slate-500 text-sm font-lato">Show</span>
+                </button>
+                <div id="details-panel" class="mt-4 hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold font-lato text-slate-700 mb-1">Yield</label>
+                        <input type="text"
+                               th:field="*{recipeYield}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 font-lato text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold font-lato text-slate-700 mb-1">Prep time</label>
+                        <input type="text"
+                               th:field="*{prepTime}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 font-lato text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="PT15M">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold font-lato text-slate-700 mb-1">Cook time</label>
+                        <input type="text"
+                               th:field="*{cookTime}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 font-lato text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="PT45M">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold font-lato text-slate-700 mb-1">Total time</label>
+                        <input type="text"
+                               th:field="*{totalTime}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 font-lato text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="PT1H">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold font-lato text-slate-700 mb-1">Calories</label>
+                        <input type="text"
+                               th:field="*{calories}"
+                               class="w-full rounded-lg border border-slate-300 px-3 py-2 font-lato text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            </section>
+
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 class="text-xl font-semibold font-montserrat text-slate-900">Ingredients</h2>
+                    <button type="button"
+                            id="add-ingredient-button"
+                            class="px-3 py-2 rounded-lg bg-slate-100 text-sm font-semibold font-lato text-slate-700 hover:bg-slate-200">
+                        Add ingredient
+                    </button>
+                </div>
+
+                <div id="ingredients-list" class="space-y-2">
+                    <div th:each="ingredient, ingredientStat : *{ingredients}" class="ingredient-row flex items-center gap-2">
+                        <input type="text"
+                               class="ingredient-input flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-lato focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               th:name="|ingredients[${ingredientStat.index}]|"
+                               th:value="${ingredient}">
+                        <button type="button" data-action="ingredient-up"
+                                class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                            Up
+                        </button>
+                        <button type="button" data-action="ingredient-down"
+                                class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                            Down
+                        </button>
+                        <button type="button" data-action="ingredient-remove"
+                                class="px-3 py-2 rounded-lg border border-red-200 text-xs font-semibold font-lato text-red-600 hover:bg-red-50">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+
+                <p th:if="${#fields.hasErrors('ingredients')}"
+                   th:errors="*{ingredients}"
+                   class="text-sm text-red-600 font-lato"></p>
+            </section>
+
+            <section class="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 space-y-4">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 class="text-xl font-semibold font-montserrat text-slate-900">Instructions</h2>
+                    <button type="button"
+                            id="add-section-button"
+                            class="px-3 py-2 rounded-lg bg-slate-100 text-sm font-semibold font-lato text-slate-700 hover:bg-slate-200">
+                        Add section
+                    </button>
+                </div>
+
+                <div id="instructions-list" class="space-y-4">
+                    <article th:each="section, sectionStat : *{instructions}"
+                             class="instruction-section rounded-xl border border-slate-200 p-4 space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <input type="text"
+                                   class="section-name-input flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-lato focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                   th:name="|instructions[${sectionStat.index}].name|"
+                                   th:value="${section.name}"
+                                   placeholder="Section name (optional)">
+                            <div class="flex items-center gap-2">
+                                <button type="button" data-action="section-up"
+                                        class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                                    Up
+                                </button>
+                                <button type="button" data-action="section-down"
+                                        class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                                    Down
+                                </button>
+                                <button type="button" data-action="section-remove"
+                                        class="px-3 py-2 rounded-lg border border-red-200 text-xs font-semibold font-lato text-red-600 hover:bg-red-50">
+                                    Remove
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="steps-list space-y-2">
+                            <div th:each="step, stepStat : ${section.steps}" class="step-row flex items-start gap-2">
+                                <textarea rows="2"
+                                          class="step-text-input flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-lato focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                          th:name="|instructions[${sectionStat.index}].steps[${stepStat.index}].text|"
+                                          th:text="${step.text}"></textarea>
+                                <div class="flex flex-col gap-2">
+                                    <button type="button" data-action="step-up"
+                                            class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                                        Up
+                                    </button>
+                                    <button type="button" data-action="step-down"
+                                            class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                                        Down
+                                    </button>
+                                    <button type="button" data-action="step-remove"
+                                            class="px-3 py-2 rounded-lg border border-red-200 text-xs font-semibold font-lato text-red-600 hover:bg-red-50">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" data-action="add-step"
+                                class="px-3 py-2 rounded-lg bg-slate-100 text-xs font-semibold font-lato text-slate-700 hover:bg-slate-200">
+                            Add step
+                        </button>
+                    </article>
+                </div>
+
+                <p th:if="${#fields.hasErrors('instructions')}"
+                   th:errors="*{instructions}"
+                   class="text-sm text-red-600 font-lato"></p>
+            </section>
+        </section>
+
+        <section id="preview-panel" class="hidden rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 space-y-5">
+            <div class="space-y-2">
+                <h2 id="preview-name" class="text-3xl font-semibold font-montserrat text-slate-900">Recipe name</h2>
+                <p id="preview-description" class="font-lato text-slate-600"></p>
+            </div>
+            <section id="preview-details-block" class="hidden rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <h3 class="text-lg font-semibold font-montserrat text-slate-900 mb-2">Details</h3>
+                <ul id="preview-details" class="space-y-1 font-lato text-sm text-slate-700"></ul>
+            </section>
+            <section class="space-y-2">
+                <h3 class="text-xl font-semibold font-montserrat text-slate-900">Ingredients</h3>
+                <ul id="preview-ingredients" class="list-disc pl-6 space-y-1 font-lato text-slate-700"></ul>
+            </section>
+            <section class="space-y-3">
+                <h3 class="text-xl font-semibold font-montserrat text-slate-900">Instructions</h3>
+                <div id="preview-instructions" class="space-y-3"></div>
+            </section>
+        </section>
+    </form>
+
+    <div class="flex items-center justify-end gap-3">
+        <a th:if="${!isParsedFlow}"
+           th:href="${cancelAction}"
+           data-ignore-unsaved="true"
+           class="px-4 py-2 rounded-lg border border-slate-300 text-sm font-semibold font-lato text-slate-700 hover:bg-slate-100"
+           th:text="${cancelLabel}">
+            Cancel
+        </a>
+        <form th:if="${isParsedFlow}" th:action="${cancelAction}" method="post" id="cancel-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+            <button type="submit"
+                    data-ignore-unsaved="true"
+                    class="px-4 py-2 rounded-lg border border-slate-300 text-sm font-semibold font-lato text-slate-700 hover:bg-slate-100"
+                    th:text="${cancelLabel}">
+                Back to all recipes
+            </button>
+        </form>
+        <button type="submit"
+                form="recipe-edit-form"
+                class="px-5 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold font-lato hover:bg-slate-800">
+            Save
+        </button>
+    </div>
+</main>
+
+<template id="ingredient-row-template">
+    <div class="ingredient-row flex items-center gap-2">
+        <input type="text"
+               class="ingredient-input flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-lato focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <button type="button" data-action="ingredient-up"
+                class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+            Up
+        </button>
+        <button type="button" data-action="ingredient-down"
+                class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+            Down
+        </button>
+        <button type="button" data-action="ingredient-remove"
+                class="px-3 py-2 rounded-lg border border-red-200 text-xs font-semibold font-lato text-red-600 hover:bg-red-50">
+            Remove
+        </button>
+    </div>
+</template>
+
+<template id="instruction-section-template">
+    <article class="instruction-section rounded-xl border border-slate-200 p-4 space-y-3">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+            <input type="text"
+                   class="section-name-input flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-lato focus:outline-none focus:ring-2 focus:ring-blue-500"
+                   placeholder="Section name (optional)">
+            <div class="flex items-center gap-2">
+                <button type="button" data-action="section-up"
+                        class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                    Up
+                </button>
+                <button type="button" data-action="section-down"
+                        class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                    Down
+                </button>
+                <button type="button" data-action="section-remove"
+                        class="px-3 py-2 rounded-lg border border-red-200 text-xs font-semibold font-lato text-red-600 hover:bg-red-50">
+                    Remove
+                </button>
+            </div>
+        </div>
+        <div class="steps-list space-y-2"></div>
+        <button type="button" data-action="add-step"
+                class="px-3 py-2 rounded-lg bg-slate-100 text-xs font-semibold font-lato text-slate-700 hover:bg-slate-200">
+            Add step
+        </button>
+    </article>
+</template>
+
+<template id="instruction-step-template">
+    <div class="step-row flex items-start gap-2">
+        <textarea rows="2"
+                  class="step-text-input flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-lato focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        <div class="flex flex-col gap-2">
+            <button type="button" data-action="step-up"
+                    class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                Up
+            </button>
+            <button type="button" data-action="step-down"
+                    class="px-3 py-2 rounded-lg border border-slate-300 text-xs font-semibold font-lato text-slate-600 hover:bg-slate-100">
+                Down
+            </button>
+            <button type="button" data-action="step-remove"
+                    class="px-3 py-2 rounded-lg border border-red-200 text-xs font-semibold font-lato text-red-600 hover:bg-red-50">
+                Remove
+            </button>
+        </div>
+    </div>
+</template>
+
+<script th:src="@{/js/recipe-edit.js}"></script>
+</body>
+</html>

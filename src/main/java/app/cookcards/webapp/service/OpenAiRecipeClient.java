@@ -6,16 +6,21 @@ import app.cookcards.webapp.user.UnitsMode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
 @Component
 public class OpenAiRecipeClient {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenAiRecipeClient.class);
 
     private static final String PARSE_PROMPT_TEMPLATE = """
             You convert an unstructured recipe into a single JSON object that matches this schema exactly (keys, nesting, types).
@@ -109,7 +114,7 @@ public class OpenAiRecipeClient {
 
     public OpenAiRecipeClient(RestClient openAiRestClient,
                               ObjectMapper mapper,
-                              @Value("${openai.model:gpt-4o-mini}") String model) {
+                              @Value("${openai.model:gpt-5-mini-2025-08-07}") String model) {
         this.openAi = openAiRestClient;
         this.mapper = mapper;
         this.model = model;
@@ -141,7 +146,7 @@ public class OpenAiRecipeClient {
                 ))
         );
 
-        String outputJson = callResponsesApi(requestBody);
+        String outputJson = callResponsesApi("recipe-proofread", requestBody);
         try {
             JsonNode node = mapper.readTree(outputJson);
             return node.path("isRecipe").asBoolean(false);
@@ -169,7 +174,7 @@ public class OpenAiRecipeClient {
                 "text", Map.of("format", schemaDefinition())
         );
 
-        String outputJson = callResponsesApi(requestBody);
+        String outputJson = callResponsesApi("recipe-json-conversion", requestBody);
         try {
             RecipeDTO recipe = mapper.readValue(outputJson, RecipeDTO.class);
             return new ParsedRecipeResult(recipe, outputJson);
@@ -178,27 +183,44 @@ public class OpenAiRecipeClient {
         }
     }
 
-    private String callResponsesApi(Map<String, Object> requestBody) {
-        String responseJson = openAi.post()
-                .uri("/responses")
-                .body(requestBody)
-                .retrieve()
-                .onStatus(HttpStatusCode::isError, (req, res) -> {
-                    String body;
-                    try {
-                        body = new String(res.getBody().readAllBytes());
-                    } catch (Exception e) {
-                        body = "<unable to read error body>";
-                    }
-                    throw new OpenAiException("OpenAI API error: HTTP " + res.getStatusCode() + " body=" + body);
-                })
-                .body(String.class);
+    private String callResponsesApi(String operation, Map<String, Object> requestBody) {
+        Instant requestStartedAt = Instant.now();
+        LOGGER.info("OpenAI request sent. operation={} at={}", operation, requestStartedAt);
+        try {
+            String responseJson = openAi.post()
+                    .uri("/responses")
+                    .body(requestBody)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::isError, (req, res) -> {
+                        String body;
+                        try {
+                            body = new String(res.getBody().readAllBytes());
+                        } catch (Exception e) {
+                            body = "<unable to read error body>";
+                        }
+                        throw new OpenAiException("OpenAI API error: HTTP " + res.getStatusCode() + " body=" + body);
+                    })
+                    .body(String.class);
 
-        if (responseJson == null || responseJson.isBlank()) {
-            throw new OpenAiException("OpenAI API returned empty response body.");
+            Instant responseReceivedAt = Instant.now();
+            long durationMs = Duration.between(requestStartedAt, responseReceivedAt).toMillis();
+            LOGGER.info("OpenAI response received. operation={} at={} durationMs={}", operation, responseReceivedAt, durationMs);
+
+            if (responseJson == null || responseJson.isBlank()) {
+                throw new OpenAiException("OpenAI API returned empty response body.");
+            }
+
+            return extractOutputJsonText(responseJson);
+        } catch (RuntimeException ex) {
+            Instant failedAt = Instant.now();
+            long durationMs = Duration.between(requestStartedAt, failedAt).toMillis();
+            LOGGER.warn("OpenAI request failed. operation={} at={} durationMs={} error={}",
+                    operation,
+                    failedAt,
+                    durationMs,
+                    ex.getMessage());
+            throw ex;
         }
-
-        return extractOutputJsonText(responseJson);
     }
 
     private String extractOutputJsonText(String responseJson) {
